@@ -26,4 +26,17 @@ class Lead extends Model
             'reserved_at' => 'datetime',
         ];
     }
+
+    public function whatsappUrl(): string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $this->whatsapp) ?: '';
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '62'.substr($digits, 1);
+        } elseif (str_starts_with($digits, '8')) {
+            $digits = '62'.$digits;
+        }
+
+        return 'https://wa.me/'.$digits;
+    }
 }
