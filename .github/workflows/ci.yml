@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   smoke-test:
@@ -33,8 +34,10 @@ jobs:
           cp .env.example .env
           sed -i 's/^APP_ENV=.*/APP_ENV=testing/' .env
           sed -i 's/^APP_DEBUG=.*/APP_DEBUG=true/' .env
+          sed -i 's/^APP_URL=.*/APP_URL=http:\/\/127.0.0.1:8080/' .env
           sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
           sed -i 's|^DB_DATABASE=.*|DB_DATABASE=/tmp/temoe-tumbuh.sqlite|' .env
+          sed -i 's/^SESSION_SECURE_COOKIE=.*/SESSION_SECURE_COOKIE=false/' .env || true
           touch /tmp/temoe-tumbuh.sqlite
           php artisan key:generate --force
 
@@ -52,7 +55,15 @@ jobs:
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
-          curl --fail --silent --show-error http://127.0.0.1:8080/ > /dev/null
-          curl --fail --silent --show-error http://127.0.0.1:8080/minat > /dev/null
-          curl --fail --silent --show-error http://127.0.0.1:8080/privasi > /dev/null
-          curl --fail --silent --show-error http://127.0.0.1:8080/up > /dev/null
+
+          for path in / /minat /privasi /up; do
+            code=$(curl --silent --show-error --output /tmp/temoe-response.html --write-out '%{http_code}' "http://127.0.0.1:8080${path}" || true)
+            echo "${path} -> HTTP ${code}"
+            if [ "$code" != "200" ]; then
+              echo '--- response ---'
+              cat /tmp/temoe-response.html || true
+              echo '--- server log ---'
+              cat /tmp/temoe-server.log || true
+              exit 1
+            fi
+          done
