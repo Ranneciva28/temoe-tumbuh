@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FormField;
 use App\Models\Lead;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class InterestController extends Controller
@@ -12,6 +15,8 @@ class InterestController extends Controller
     public function create(Request $request): View
     {
         return view('interest.create', [
+            'fields' => FormField::query()->where('form_key', 'interest')->where('is_active', true)->orderBy('sort_order')->get(),
+            'tracking' => Setting::groupValues('tracking'),
             'attribution' => [
                 'utm_source' => $request->query('utm_source'),
                 'utm_medium' => $request->query('utm_medium'),
@@ -52,7 +57,28 @@ class InterestController extends Controller
             'referrer' => ['nullable','string'],
         ]);
 
+        $fields = FormField::query()->where('form_key', 'interest')->where('is_active', true)->get();
+        $rules = [];
+        $attributes = [];
+
+        foreach ($fields as $field) {
+            $fieldRules = [$field->is_required ? 'required' : 'nullable'];
+            $fieldRules[] = match ($field->type) {
+                'email' => 'email',
+                'number' => 'numeric',
+                'date' => 'date',
+                'checkbox' => 'array',
+                default => 'string',
+            };
+            if ($field->type !== 'checkbox') $fieldRules[] = 'max:2000';
+            $rules[$field->field_key] = $fieldRules;
+            $attributes[$field->field_key] = $field->label;
+        }
+
+        $customFields = Validator::make((array) $request->input('custom', []), $rules, [], $attributes)->validate();
+
         $data['reservation_interest'] = $request->boolean('reservation_interest');
+        $data['custom_fields'] = $customFields ?: null;
         $data['ip_address'] = $request->ip();
         $data['user_agent'] = $request->userAgent();
 
@@ -63,6 +89,8 @@ class InterestController extends Controller
 
     public function thankYou(): View
     {
-        return view('interest.thank-you');
+        return view('interest.thank-you', [
+            'tracking' => Setting::groupValues('tracking'),
+        ]);
     }
 }
