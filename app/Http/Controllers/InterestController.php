@@ -9,6 +9,7 @@ use App\Services\MetaConversionsApi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class InterestController extends Controller
@@ -50,10 +51,10 @@ class InterestController extends Controller
             'utm_campaign' => ['nullable','string','max:255'],
             'utm_content' => ['nullable','string','max:255'],
             'utm_term' => ['nullable','string','max:255'],
-            'fbclid' => ['nullable','string'],
-            'gclid' => ['nullable','string'],
-            'landing_page' => ['nullable','string'],
-            'referrer' => ['nullable','string'],
+            'fbclid' => ['nullable','string','max:2000'],
+            'gclid' => ['nullable','string','max:2000'],
+            'landing_page' => ['nullable','string','max:4000'],
+            'referrer' => ['nullable','string','max:4000'],
         ]);
 
         $fields = FormField::query()->where('form_key', 'interest')->where('is_active', true)->get();
@@ -61,17 +62,31 @@ class InterestController extends Controller
         $attributes = [];
 
         foreach ($fields as $field) {
+            $key = $field->field_key;
+            $options = array_values(array_filter((array) $field->options, fn ($value) => is_string($value) && $value !== ''));
             $fieldRules = [$field->is_required ? 'required' : 'nullable'];
-            $fieldRules[] = match ($field->type) {
-                'email' => 'email',
-                'number' => 'numeric',
-                'date' => 'date',
-                'checkbox' => 'array',
-                default => 'string',
-            };
-            if ($field->type !== 'checkbox') $fieldRules[] = 'max:2000';
-            $rules[$field->field_key] = $fieldRules;
-            $attributes[$field->field_key] = $field->label;
+
+            if ($field->type === 'checkbox') {
+                $fieldRules[] = 'array';
+                $fieldRules[] = 'max:100';
+                $rules[$key] = $fieldRules;
+                if ($options) $rules[$key.'.*'] = ['string', Rule::in($options)];
+            } else {
+                $fieldRules[] = match ($field->type) {
+                    'email' => 'email',
+                    'number' => 'numeric',
+                    'date' => 'date',
+                    default => 'string',
+                };
+                $fieldRules[] = 'max:2000';
+                if (in_array($field->type, ['select','radio'], true) && $options) {
+                    $fieldRules[] = Rule::in($options);
+                }
+                $rules[$key] = $fieldRules;
+            }
+
+            $attributes[$key] = $field->label;
+            $attributes[$key.'.*'] = $field->label;
         }
 
         $customFields = Validator::make((array) $request->input('custom', []), $rules, [], $attributes)->validate();
