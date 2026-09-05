@@ -9,6 +9,6 @@ class Media extends Model
     protected $table = 'media';
 
     protected $fillable = [
-        'name','path','disk','mime_type','size','alt_text',
+        'original_name','path','disk','mime_type','size','alt_text',
     ];
 }
