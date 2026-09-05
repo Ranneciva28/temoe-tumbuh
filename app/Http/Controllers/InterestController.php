@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FormField;
 use App\Models\Lead;
 use App\Models\Setting;
+use App\Services\MetaConversionsApi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -28,7 +29,7 @@ class InterestController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, MetaConversionsApi $meta): RedirectResponse
     {
         $data = $request->validate([
             'parent_name' => ['required','string','max:120'],
@@ -79,9 +80,10 @@ class InterestController extends Controller
         $data['ip_address'] = $request->ip();
         $data['user_agent'] = $request->userAgent();
 
-        Lead::create($data);
+        $lead = Lead::create($data);
+        $metaEventId = $meta->sendLead($lead, $request);
 
-        return redirect()->route('interest.thank-you');
+        return redirect()->route('interest.thank-you')->with('meta_event_id', $metaEventId);
     }
 
     public function thankYou(): View
