@@ -63,6 +63,8 @@ class PageSectionController extends Controller
 
     private function attachImage(Request $request, array &$data): void
     {
+        unset($data['image']);
+
         if (! $request->hasFile('image')) return;
 
         $file = $request->file('image');
