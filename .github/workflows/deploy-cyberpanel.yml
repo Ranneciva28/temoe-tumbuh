@@ -12,19 +12,27 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOST: ${{ secrets.TENCENT_SSH_HOST }}
     steps:
+      - name: Deployment not configured yet
+        if: env.DEPLOY_HOST == ''
+        run: echo "Tencent deployment secrets are not configured yet; skipping deploy."
+
       - name: Prepare SSH key
+        if: env.DEPLOY_HOST != ''
         shell: bash
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.TENCENT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.TENCENT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -p "${{ secrets.TENCENT_SSH_PORT }}" -H "${{ secrets.TENCENT_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Deploy application
+        if: env.DEPLOY_HOST != ''
         shell: bash
         run: |
-          ssh -i ~/.ssh/id_ed25519 \
+          ssh -i ~/.ssh/id_deploy \
             -p "${{ secrets.TENCENT_SSH_PORT }}" \
             "${{ secrets.TENCENT_SSH_USER }}@${{ secrets.TENCENT_SSH_HOST }}" \
             "cd '${{ secrets.TENCENT_APP_PATH }}' && bash deploy/cyberpanel-deploy.sh"
