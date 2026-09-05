@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\InterestController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
@@ -9,4 +10,4 @@ Route::get('/minat', [InterestController::class, 'create'])->name('interest.crea
 Route::post('/minat', [InterestController::class, 'store'])->name('interest.store');
 Route::get('/terima-kasih', [InterestController::class, 'thankYou'])->name('interest.thank-you');
 
-Route::view('/admin', 'admin.index')->name('admin.index');
+Route::get('/admin', DashboardController::class)->name('admin.index');
