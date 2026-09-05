@@ -1,0 +1,58 @@
+name: Laravel CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Validate Composer manifest
+        run: composer validate --no-check-lock
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=true/' .env
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=/tmp/temoe-tumbuh.sqlite|' .env
+          touch /tmp/temoe-tumbuh.sqlite
+          php artisan key:generate --force
+
+      - name: Boot and migrate
+        run: |
+          php artisan migrate --seed --force
+          php artisan route:list
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      - name: Smoke test public routes
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8080 > /tmp/temoe-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:8080/ > /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8080/minat > /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8080/privasi > /dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8080/up > /dev/null
