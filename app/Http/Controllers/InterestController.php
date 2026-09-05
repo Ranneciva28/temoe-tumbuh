@@ -44,6 +44,7 @@ class InterestController extends Controller
             'preferred_start_date' => ['nullable','date'],
             'budget_range' => ['nullable','string','max:120'],
             'reservation_interest' => ['nullable','boolean'],
+            'privacy_consent' => ['accepted'],
             'utm_source' => ['nullable','string','max:255'],
             'utm_medium' => ['nullable','string','max:255'],
             'utm_campaign' => ['nullable','string','max:255'],
@@ -75,9 +76,12 @@ class InterestController extends Controller
 
         $customFields = Validator::make((array) $request->input('custom', []), $rules, [], $attributes)->validate();
 
+        unset($data['privacy_consent']);
         $data['reservation_interest'] = $request->boolean('reservation_interest');
         $data['custom_fields'] = $customFields ?: null;
-        $data['ip_address'] = $request->ip();
+        $data['consent_at'] = now();
+        $data['consent_version'] = '2026-09-05-v1';
+        $data['ip_address'] = $request->headers->get('CF-Connecting-IP') ?: $request->ip();
         $data['user_agent'] = $request->userAgent();
 
         $lead = Lead::create($data);
