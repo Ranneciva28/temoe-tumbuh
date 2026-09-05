@@ -2,34 +2,54 @@
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-$(pwd)}"
-PHP_BIN="${PHP_BIN:-php}"
 COMPOSER_BIN="${COMPOSER_BIN:-composer}"
 BRANCH="${DEPLOY_BRANCH:-main}"
 
+if [ -n "${PHP_BIN:-}" ]; then
+  PHP="${PHP_BIN}"
+elif [ -x /usr/local/lsws/lsphp83/bin/php ]; then
+  PHP="/usr/local/lsws/lsphp83/bin/php"
+else
+  PHP="$(command -v php)"
+fi
+
 cd "$APP_DIR"
+
+maintenance_started=0
+bring_up() {
+  if [ "$maintenance_started" -eq 1 ] && [ -f artisan ]; then
+    "$PHP" artisan up >/dev/null 2>&1 || true
+  fi
+}
+trap bring_up EXIT
 
 echo "[Temoe Tumbuh] Fetching latest code..."
 git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
 echo "[Temoe Tumbuh] Installing PHP dependencies..."
-$COMPOSER_BIN install \
+"$COMPOSER_BIN" install \
   --no-dev \
   --prefer-dist \
   --no-interaction \
   --optimize-autoloader
 
 if [ -f artisan ]; then
-  echo "[Temoe Tumbuh] Preparing Laravel..."
-  $PHP_BIN artisan down --retry=10 || true
-  $PHP_BIN artisan migrate --force
-  $PHP_BIN artisan storage:link || true
-  $PHP_BIN artisan optimize:clear
-  $PHP_BIN artisan config:cache
-  $PHP_BIN artisan route:cache
-  $PHP_BIN artisan view:cache
+  echo "[Temoe Tumbuh] Preparing Laravel with $PHP..."
+  mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
   chmod -R ug+rw storage bootstrap/cache || true
-  $PHP_BIN artisan up || true
+
+  "$PHP" artisan down --retry=10 || true
+  maintenance_started=1
+
+  "$PHP" artisan migrate --force
+  "$PHP" artisan storage:link || true
+  "$PHP" artisan optimize:clear
+  "$PHP" artisan config:cache
+  "$PHP" artisan route:cache
+  "$PHP" artisan view:cache
+  "$PHP" artisan up
+  maintenance_started=0
 fi
 
 echo "[Temoe Tumbuh] Deployment complete."
