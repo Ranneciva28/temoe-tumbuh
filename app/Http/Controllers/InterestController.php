@@ -14,20 +14,17 @@ class InterestController extends Controller
 {
     public function create(Request $request): View
     {
+        $attribution = [];
+        foreach (['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'] as $key) {
+            $attribution[$key] = $request->old($key, $request->query($key));
+        }
+        $attribution['landing_page'] = $request->old('landing_page', $request->fullUrl());
+        $attribution['referrer'] = $request->old('referrer', $request->headers->get('referer'));
+
         return view('interest.create', [
             'fields' => FormField::query()->where('form_key', 'interest')->where('is_active', true)->orderBy('sort_order')->get(),
             'tracking' => Setting::groupValues('tracking'),
-            'attribution' => [
-                'utm_source' => $request->query('utm_source'),
-                'utm_medium' => $request->query('utm_medium'),
-                'utm_campaign' => $request->query('utm_campaign'),
-                'utm_content' => $request->query('utm_content'),
-                'utm_term' => $request->query('utm_term'),
-                'fbclid' => $request->query('fbclid'),
-                'gclid' => $request->query('gclid'),
-                'landing_page' => $request->fullUrl(),
-                'referrer' => $request->headers->get('referer'),
-            ],
+            'attribution' => $attribution,
         ]);
     }
 
