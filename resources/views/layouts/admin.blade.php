@@ -27,6 +27,8 @@
             <a class="{{ request()->routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}">▧ <span>Media</span></a>
             <div class="nav-label">Marketing</div>
             <a class="{{ request()->routeIs('admin.tracking.*') ? 'active' : '' }}" href="{{ route('admin.tracking.edit') }}">⌁ <span>Tracking</span></a>
+            <div class="nav-label">Akun</div>
+            <a class="{{ request()->routeIs('admin.password.*') ? 'active' : '' }}" href="{{ route('admin.password.edit') }}">⚿ <span>Ubah Password</span></a>
         </nav>
         <div class="sidebar-footer">
             <form method="post" action="{{ route('admin.logout') }}">@csrf<button class="logout">Keluar</button></form>
