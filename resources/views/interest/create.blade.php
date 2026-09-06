@@ -3,5 +3,50 @@
 <div class="section"><h2>1. Tentang orang tua</h2><div class="grid"><div class="field"><label>Nama orang tua *</label><input class="input" name="parent_name" value="{{ old('parent_name') }}" required></div><div class="field"><label>Nomor WhatsApp *</label><input class="input" type="tel" name="whatsapp" value="{{ old('whatsapp') }}" required placeholder="08xxxxxxxxxx"></div></div><div class="field"><label>Email</label><input class="input" type="email" name="email" value="{{ old('email') }}"></div></div>
 <div class="section"><h2>2. Tentang anak & lokasi</h2><div class="grid"><div class="field"><label>Nama anak</label><input class="input" name="child_name" value="{{ old('child_name') }}"></div><div class="field"><label>Usia anak</label><input class="input" type="number" min="0" max="12" name="child_age" value="{{ old('child_age') }}"></div><div class="field"><label>Kota</label><select class="select" name="city"><option value="">Pilih kota</option>@foreach(['Cilegon','Serang','Lainnya'] as $city)<option value="{{ $city }}" @selected(old('city')===$city)>{{ $city }}</option>@endforeach</select></div><div class="field"><label>Kecamatan / area tinggal</label><input class="input" name="district" value="{{ old('district') }}"></div></div><div class="field"><label>Area daycare yang paling nyaman</label><input class="input" name="preferred_location" value="{{ old('preferred_location') }}" placeholder="Contoh: Cilegon Kota, Cibeber, dekat kantor..."></div></div>
 <div class="section"><h2>3. Kebutuhan daycare</h2><div class="grid"><div class="field"><label>Kebutuhan jadwal</label><select class="select" name="preferred_schedule"><option value="">Pilih</option>@foreach(['Senin–Jumat full day','Beberapa hari per minggu','Half day','Fleksibel / insidental'] as $schedule)<option value="{{ $schedule }}" @selected(old('preferred_schedule')===$schedule)>{{ $schedule }}</option>@endforeach</select></div><div class="field"><label>Kapan ingin mulai?</label><input class="input" type="date" name="preferred_start_date" value="{{ old('preferred_start_date') }}"></div></div><div class="field"><label>Budget daycare per bulan</label><select class="select" name="budget_range"><option value="">Pilih range</option>@foreach(['< Rp1,5 juta','Rp1,5–2 juta','Rp2–2,5 juta','Rp2,5–3 juta','> Rp3 juta'] as $budget)<option value="{{ $budget }}" @selected(old('budget_range')===$budget)>{{ $budget }}</option>@endforeach</select></div></div>
-@if($fields->isNotEmpty())<div class="section"><h2>4. Sedikit lagi</h2>@foreach($fields as $field)<div class="field"><label>{{ $field->label }} @if($field->is_required)*@endif</label>@if($field->type==='textarea')<textarea class="textarea" name="custom[{{ $field->field_key }}]" @required($field->is_required) placeholder="{{ $field->placeholder }}">{{ old('custom.'.$field->field_key) }}</textarea>@elseif(in_array($field->type,['select','radio'],true))@if($field->type==='select')<select class="select" name="custom[{{ $field->field_key }}]" @required($field->is_required)><option value="">Pilih</option>@foreach($field->options ?? [] as $option)<option value="{{ $option }}" @selected(old('custom.'.$field->field_key)===$option)>{{ $option }}</option>@endforeach</select>@else@foreach($field->options ?? [] as $option)<label class="choice"><input type="radio" name="custom[{{ $field->field_key }}]" value="{{ $option }}" @checked(old('custom.'.$field->field_key)===$option) @required($field->is_required)> <span>{{ $option }}</span></label>@endforeach@endif @elseif($field->type==='checkbox')@foreach($field->options ?? [] as $option)<label class="choice"><input type="checkbox" name="custom[{{ $field->field_key }}][]" value="{{ $option }}" @checked(in_array($option,(array)old('custom.'.$field->field_key,[]),true))> <span>{{ $option }}</span></label>@endforeach @else<input class="input" type="{{ in_array($field->type,['email','tel','number','date'],true)?$field->type:'text' }}" name="custom[{{ $field->field_key }}]" value="{{ old('custom.'.$field->field_key) }}" @required($field->is_required) placeholder="{{ $field->placeholder }}">@endif @if($field->help_text)<div class="help">{{ $field->help_text }}</div>@endif</div>@endforeach</div>@endif
+@if($fields->isNotEmpty())
+<div class="section">
+    <h2>4. Sedikit lagi</h2>
+    @foreach($fields as $field)
+        <div class="field">
+            <label>
+                {{ $field->label }}
+                @if($field->is_required) * @endif
+            </label>
+
+            @if($field->type === 'textarea')
+                <textarea class="textarea" name="custom[{{ $field->field_key }}]" @required($field->is_required) placeholder="{{ $field->placeholder }}">{{ old('custom.'.$field->field_key) }}</textarea>
+            @elseif(in_array($field->type, ['select', 'radio'], true))
+                @if($field->type === 'select')
+                    <select class="select" name="custom[{{ $field->field_key }}]" @required($field->is_required)>
+                        <option value="">Pilih</option>
+                        @foreach($field->options ?? [] as $option)
+                            <option value="{{ $option }}" @selected(old('custom.'.$field->field_key) === $option)>{{ $option }}</option>
+                        @endforeach
+                    </select>
+                @else
+                    @foreach($field->options ?? [] as $option)
+                        <label class="choice">
+                            <input type="radio" name="custom[{{ $field->field_key }}]" value="{{ $option }}" @checked(old('custom.'.$field->field_key) === $option) @required($field->is_required)>
+                            <span>{{ $option }}</span>
+                        </label>
+                    @endforeach
+                @endif
+            @elseif($field->type === 'checkbox')
+                @foreach($field->options ?? [] as $option)
+                    <label class="choice">
+                        <input type="checkbox" name="custom[{{ $field->field_key }}][]" value="{{ $option }}" @checked(in_array($option, (array) old('custom.'.$field->field_key, []), true))>
+                        <span>{{ $option }}</span>
+                    </label>
+                @endforeach
+            @else
+                <input class="input" type="{{ in_array($field->type, ['email', 'tel', 'number', 'date'], true) ? $field->type : 'text' }}" name="custom[{{ $field->field_key }}]" value="{{ old('custom.'.$field->field_key) }}" @required($field->is_required) placeholder="{{ $field->placeholder }}">
+            @endif
+
+            @if($field->help_text)
+                <div class="help">{{ $field->help_text }}</div>
+            @endif
+        </div>
+    @endforeach
+</div>
+@endif
 <div class="section"><label class="choice"><input type="checkbox" name="reservation_interest" value="1" @checked(old('reservation_interest'))><span><strong>Saya tertarik mendapat priority slot / Founding Parents</strong><div class="help">Kami akan menghubungi lo kalau Temoe Tumbuh sudah masuk tahap reservasi awal.</div></span></label><label class="choice"><input type="checkbox" name="privacy_consent" value="1" @checked(old('privacy_consent')) required><span>Saya sudah membaca <a target="_blank" href="{{ route('privacy') }}">Pemberitahuan Privasi</a> dan menyetujui penggunaan data yang saya kirim untuk validasi dan komunikasi Temoe Tumbuh. *</span></label></div>@foreach($attribution as $key=>$value)<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endforeach<button class="submit" type="submit">Kirim Minat Saya →</button><div class="privacy">Belum ada kewajiban membeli. Data digunakan untuk validasi kebutuhan dan komunikasi terkait Temoe Tumbuh.</div></form></div></div></body></html>
