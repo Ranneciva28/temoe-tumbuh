@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FormFieldController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\PasswordController;
 use App\Http\Controllers\Admin\PageSectionController;
 use App\Http\Controllers\Admin\TrackingSettingController;
 use App\Http\Controllers\InterestController;
@@ -25,6 +26,8 @@ Route::middleware('guest')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('index');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::get('/account/password', [PasswordController::class, 'edit'])->name('password.edit');
+    Route::put('/account/password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::get('/leads/export', [LeadController::class, 'export'])->name('leads.export');
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
