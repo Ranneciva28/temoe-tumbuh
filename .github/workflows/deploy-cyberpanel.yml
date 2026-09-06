@@ -35,4 +35,7 @@ jobs:
           ssh -i ~/.ssh/id_deploy \
             -p "${{ secrets.TENCENT_SSH_PORT }}" \
             "${{ secrets.TENCENT_SSH_USER }}@${{ secrets.TENCENT_SSH_HOST }}" \
-            "cd '${{ secrets.TENCENT_APP_PATH }}' && bash deploy/cyberpanel-deploy.sh"
+            "sudo -n -u '${{ secrets.TENCENT_SITE_USER }}' -H env \
+              APP_DIR='${{ secrets.TENCENT_APP_PATH }}' \
+              PHP_BIN='/usr/local/lsws/lsphp83/bin/php' \
+              bash '${{ secrets.TENCENT_APP_PATH }}/deploy/cyberpanel-deploy.sh'"
