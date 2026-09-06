@@ -4,6 +4,7 @@ set -euo pipefail
 DOMAIN="${1:-}"
 REPO_URL="${2:-https://github.com/Ranneciva28/temoe-tumbuh.git}"
 PHP_BIN="${PHP_BIN:-/usr/local/lsws/lsphp83/bin/php}"
+COMPOSER_BIN="${COMPOSER_BIN:-$(command -v composer || true)}"
 
 if [ -z "$DOMAIN" ]; then
   echo "Usage: bash deploy/cyberpanel-first-install.sh yourdomain.com [repo-url]"
@@ -19,7 +20,12 @@ if [ -z "$PHP_BIN" ]; then
   exit 1
 fi
 
-if ! command -v composer >/dev/null 2>&1; then
+if ! "$PHP_BIN" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);'; then
+  echo "Temoe Tumbuh requires PHP 8.3 or newer. Selected: $PHP_BIN"
+  exit 1
+fi
+
+if [ -z "$COMPOSER_BIN" ] || [ ! -f "$COMPOSER_BIN" ]; then
   echo "Composer not found. Install Composer first."
   exit 1
 fi
@@ -50,7 +56,7 @@ if [ ! -f .env ]; then
   echo "Created .env from .env.example."
 fi
 
-composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+"$PHP_BIN" "$COMPOSER_BIN" install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 if ! grep -q '^APP_KEY=base64:' .env; then
   "$PHP_BIN" artisan key:generate --force
