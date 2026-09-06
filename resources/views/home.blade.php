@@ -13,5 +13,27 @@ $heroCta = $withAttribution($hero?->cta_url ?: route('interest.create'));
 <div class="wrap"><nav class="nav"><div class="brand">Temoe Tumbuh</div><a class="nav-cta" href="{{ $interestUrl }}">Daftar Minat</a></nav>
 <section class="hero"><div><span class="eyebrow">CILEGON & SERANG · MARKET VALIDATION</span><h1>{{ $hero?->title ?: 'Tempat kecil untuk tumbuh dengan besar.' }}</h1><p>{{ $hero?->subtitle ?: 'Temoe Tumbuh sedang mempersiapkan daycare yang hangat, aman, dan dirancang mengikuti kebutuhan keluarga di Cilegon dan Serang.' }}</p><div class="actions"><a class="btn btn-primary" href="{{ $heroCta }}">{{ $hero?->cta_label ?: 'Isi Form Minat' }}</a><a class="btn btn-soft" href="#tentang">Kenapa Temoe Tumbuh?</a></div></div><div class="hero-art">@if($hero?->image_path)<img src="{{ str_starts_with($hero->image_path,'http') ? $hero->image_path : asset(ltrim($hero->image_path,'/')) }}" alt="Temoe Tumbuh">@endif</div></section>
 <section id="tentang" class="section"><div class="section-head"><h2>Daycare bukan cuma soal menitipkan.</h2><p>Kami ingin membangun layanan yang benar-benar menjawab ritme keluarga: anak merasa aman dan terstimulasi, orang tua bisa bekerja dengan lebih tenang.</p></div><div class="grid"><div class="card"><h3>🌱 Bertumbuh</h3><p>Aktivitas yang mengikuti fase perkembangan anak, bukan sekadar mengisi waktu.</p></div><div class="card"><h3>🏡 Merasa aman</h3><p>Lingkungan hangat dengan pola komunikasi yang membuat orang tua tetap terhubung.</p></div><div class="card"><h3>🫶 Dibangun bersama</h3><p>Lokasi, jadwal, dan paket awal akan diprioritaskan dari kebutuhan keluarga yang mendaftar sekarang.</p></div></div></section></div>
-@foreach($sections->where('section_key','!=','hero') as $section)<section class="cms-section"><div class="wrap cms-inner"><div class="cms-copy"><h2>{{ $section->title }}</h2>@if($section->subtitle)<div class="sub">{{ $section->subtitle }}</div>@endif@if($section->content)<p>{{ $section->content }}</p>@endif@if($section->cta_label)<a class="btn btn-primary" style="margin-top:12px" href="{{ $withAttribution($section->cta_url ?: route('interest.create')) }}">{{ $section->cta_label }}</a>@endif</div><div class="cms-image">@if($section->image_path)<img src="{{ str_starts_with($section->image_path,'http') ? $section->image_path : asset(ltrim($section->image_path,'/')) }}" alt="{{ $section->title }}">@endif</div></div></section>@endforeach
+@foreach($sections->where('section_key', '!=', 'hero') as $section)
+<section class="cms-section">
+    <div class="wrap cms-inner">
+        <div class="cms-copy">
+            <h2>{{ $section->title }}</h2>
+            @if($section->subtitle)
+                <div class="sub">{{ $section->subtitle }}</div>
+            @endif
+            @if($section->content)
+                <p>{{ $section->content }}</p>
+            @endif
+            @if($section->cta_label)
+                <a class="btn btn-primary" style="margin-top:12px" href="{{ $withAttribution($section->cta_url ?: route('interest.create')) }}">{{ $section->cta_label }}</a>
+            @endif
+        </div>
+        <div class="cms-image">
+            @if($section->image_path)
+                <img src="{{ str_starts_with($section->image_path, 'http') ? $section->image_path : asset(ltrim($section->image_path, '/')) }}" alt="{{ $section->title }}">
+            @endif
+        </div>
+    </div>
+</section>
+@endforeach
 <div class="wrap"><section class="final"><h2>Bantu kami menentukan Temoe Tumbuh pertama.</h2><p>Isi kebutuhan keluarga lo. Data ini dipakai untuk menentukan area, jadwal, paket, dan prioritas pembukaan daycare.</p><a class="btn" href="{{ $interestUrl }}">Daftar Minat Temoe Tumbuh</a></section><footer class="footer"><div class="footer-inner"><strong>Temoe Tumbuh</strong><span>Market validation · Cilegon & Serang</span></div></footer></div></body></html>
