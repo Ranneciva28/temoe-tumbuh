@@ -50,7 +50,10 @@ Configure these repository Actions secrets:
 - `TENCENT_SSH_PORT` — normally `22`
 - `TENCENT_SSH_USER` — deployment SSH user
 - `TENCENT_SSH_PRIVATE_KEY` — private key dedicated to deployment
+- `TENCENT_SITE_USER` — CyberPanel website owner, for example `temoe6594`
 - `TENCENT_APP_PATH` — `/home/<domain>/laravel-app`
+
+The SSH user must be allowed to run the deployment command as `TENCENT_SITE_USER` through passwordless `sudo`. The workflow deliberately runs Git, Composer, migrations, and cache commands as the website owner so deployments do not leave root-owned application files behind.
 
 Never commit SSH private keys, database passwords, admin passwords, Meta CAPI tokens, or `.env`.
 
