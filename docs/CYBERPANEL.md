@@ -40,7 +40,7 @@ php artisan storage:link
 php artisan optimize
 ```
 
-If CyberPanel's CLI PHP differs from the website PHP, use the LiteSpeed PHP binary, for example `/usr/local/lsws/lsphp83/bin/php`.
+If CyberPanel's CLI PHP differs from the website PHP, use the LiteSpeed PHP binary, for example `/usr/local/lsws/lsphp83/bin/php`. The deployment scripts also run Composer through this PHP binary, so a system Composer configured with an older default PHP remains safe.
 
 ## 3. GitHub Actions secrets
 
