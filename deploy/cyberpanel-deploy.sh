@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-$(pwd)}"
-COMPOSER_BIN="${COMPOSER_BIN:-composer}"
+COMPOSER_BIN="${COMPOSER_BIN:-$(command -v composer || true)}"
 BRANCH="${DEPLOY_BRANCH:-main}"
 
 if [ -n "${PHP_BIN:-}" ]; then
@@ -11,6 +11,16 @@ elif [ -x /usr/local/lsws/lsphp83/bin/php ]; then
   PHP="/usr/local/lsws/lsphp83/bin/php"
 else
   PHP="$(command -v php)"
+fi
+
+if ! "$PHP" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);'; then
+  echo "Temoe Tumbuh requires PHP 8.3 or newer. Selected: $PHP"
+  exit 1
+fi
+
+if [ -z "$COMPOSER_BIN" ] || [ ! -f "$COMPOSER_BIN" ]; then
+  echo "Composer not found. Install Composer first."
+  exit 1
 fi
 
 cd "$APP_DIR"
@@ -28,7 +38,7 @@ git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
 echo "[Temoe Tumbuh] Installing PHP dependencies..."
-"$COMPOSER_BIN" install \
+"$PHP" "$COMPOSER_BIN" install \
   --no-dev \
   --prefer-dist \
   --no-interaction \
