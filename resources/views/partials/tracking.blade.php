@@ -16,3 +16,42 @@ window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
 @if(!empty($tracking['google_ads_conversion_id']))gtag('config',@json($tracking['google_ads_conversion_id']));@endif
 </script>
 @endif
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    function track(element){
+        if(!element||element.dataset.tracked==='1')return;
+        element.dataset.tracked='1';
+        var name=element.dataset.eventName||'website_action';
+        var metaEvent=element.dataset.metaEvent;
+        var gaEvent=element.dataset.gaEvent;
+        var params={
+            content_name:name,
+            content_category:element.dataset.eventCategory||'website',
+            link_url:element.href||window.location.href
+        };
+        if(metaEvent&&typeof window.fbq==='function')window.fbq('track',metaEvent,params);
+        if(gaEvent&&typeof window.gtag==='function')window.gtag('event',gaEvent,{
+            event_label:name,
+            event_category:params.content_category,
+            link_url:params.link_url
+        });
+    }
+
+    document.addEventListener('click',function(event){
+        var target=event.target.closest('[data-meta-event],[data-ga-event]');
+        if(target&&!target.matches('details'))track(target);
+    });
+    document.querySelectorAll('details[data-meta-event],details[data-ga-event]').forEach(function(detail){
+        detail.addEventListener('toggle',function(){
+            if(detail.open){
+                detail.dataset.tracked='0';
+                track(detail);
+            }
+        });
+    });
+    document.querySelectorAll('form[data-track-form]').forEach(function(form){
+        form.addEventListener('submit',function(){track(form);});
+    });
+});
+</script>
