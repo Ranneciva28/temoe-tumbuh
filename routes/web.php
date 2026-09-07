@@ -51,6 +51,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/tracking', [TrackingSettingController::class, 'edit'])->name('tracking.edit');
     Route::put('/tracking', [TrackingSettingController::class, 'update'])->name('tracking.update');
+    Route::post('/tracking/test/{platform}', [TrackingSettingController::class, 'test'])->name('tracking.test');
     Route::get('/branding', [BrandingSettingController::class, 'edit'])->name('branding.edit');
     Route::put('/branding', [BrandingSettingController::class, 'update'])->name('branding.update');
 });
