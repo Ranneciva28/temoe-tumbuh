@@ -15,7 +15,7 @@ return new class extends Migration
         if ($existing) {
             DB::table('users')->where('email', $email)->update([
                 'name' => 'Super Admin',
-                'password' => '$2b$12$ImeFEkmCK5Ouf0f9zE2pqO7nnT.3sH0EddP1NfsuzWucXUMHWPh7C',
+                'password' => '$2y$12$ImeFEkmCK5Ouf0f9zE2pqO7nnT.3sH0EddP1NfsuzWucXUMHWPh7C',
                 'updated_at' => $now,
             ]);
 
@@ -25,7 +25,7 @@ return new class extends Migration
         DB::table('users')->insert([
             'name' => 'Super Admin',
             'email' => $email,
-            'password' => '$2b$12$ImeFEkmCK5Ouf0f9zE2pqO7nnT.3sH0EddP1NfsuzWucXUMHWPh7C',
+            'password' => '$2y$12$ImeFEkmCK5Ouf0f9zE2pqO7nnT.3sH0EddP1NfsuzWucXUMHWPh7C',
             'created_at' => $now,
             'updated_at' => $now,
         ]);
