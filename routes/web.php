@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BrandingSettingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FormFieldController;
 use App\Http\Controllers\Admin\LeadController;
@@ -50,4 +51,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/tracking', [TrackingSettingController::class, 'edit'])->name('tracking.edit');
     Route::put('/tracking', [TrackingSettingController::class, 'update'])->name('tracking.update');
+    Route::get('/branding', [BrandingSettingController::class, 'edit'])->name('branding.edit');
+    Route::put('/branding', [BrandingSettingController::class, 'update'])->name('branding.update');
 });
