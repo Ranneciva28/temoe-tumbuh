@@ -55,17 +55,19 @@ class AdEventTester
 
         $response = Http::asJson()->timeout(12)->retry(1, 250)
             ->post("https://graph.facebook.com/v23.0/{$pixelId}/events", $payload);
+        $body = $response->json() ?: ['body' => Str::limit($response->body(), 1500)];
+        $accepted = $response->successful() && (int) data_get($body, 'events_received', 0) > 0;
 
         return [
             'platform' => 'Meta',
-            'success' => $response->successful(),
-            'message' => $response->successful()
+            'success' => $accepted,
+            'message' => $accepted
                 ? 'Meta menerima dummy Lead. Cek Events Manager → Test Events.'
                 : 'Meta menolak event. Periksa Pixel ID, token, Test Event Code, dan detail respons.',
             'http_status' => $response->status(),
             'event_id' => $eventId,
             'payload' => $this->redactMeta($payload),
-            'response' => $response->json() ?: ['body' => Str::limit($response->body(), 1500)],
+            'response' => $body,
         ];
     }
 
@@ -84,7 +86,7 @@ class AdEventTester
                 'event_id' => $eventId,
                 'user' => [
                     'email' => hash('sha256', 'test@temoetumbuh.web.id'),
-                    'phone' => hash('sha256', '6280000000000'),
+                    'phone_number' => hash('sha256', '6280000000000'),
                     'external_id' => hash('sha256', 'temoe-dummy-user'),
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent() ?: 'TemoeTumbuh-TestEvent/1.0',
