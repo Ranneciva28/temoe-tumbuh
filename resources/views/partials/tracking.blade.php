@@ -7,6 +7,12 @@ fbq('track', 'PageView');
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ urlencode($tracking['meta_pixel_id']) }}&ev=PageView&noscript=1" alt=""></noscript>
 @endif
 
+@if(!empty($tracking['tiktok_pixel_id']))
+<script>
+!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js',o=n&&n.partner;ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=r;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};var a=document.createElement('script');a.type='text/javascript';a.async=!0;a.src=r+'?sdkid='+e+'&lib='+t;var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(a,s)};ttq.load(@json($tracking['tiktok_pixel_id']));ttq.page()}(window,document,'ttq');
+</script>
+@endif
+
 @php($gtagId = $tracking['ga4_measurement_id'] ?? ($tracking['google_ads_conversion_id'] ?? null))
 @if(!empty($gtagId))
 <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($gtagId) }}"></script>
@@ -31,6 +37,7 @@ document.addEventListener('DOMContentLoaded',function(){
             link_url:element.href||window.location.href
         };
         if(metaEvent&&typeof window.fbq==='function')window.fbq('track',metaEvent,params);
+        if(metaEvent&&window.ttq&&typeof window.ttq.track==='function')window.ttq.track(metaEvent,params);
         if(gaEvent&&typeof window.gtag==='function')window.gtag('event',gaEvent,{
             event_label:name,
             event_category:params.content_category,
