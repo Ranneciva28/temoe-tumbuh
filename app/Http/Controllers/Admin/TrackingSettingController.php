@@ -62,7 +62,7 @@ class TrackingSettingController extends Controller
             $result = [
                 'platform' => ucfirst($platform),
                 'success' => false,
-                'message' => 'Koneksi test gagal: '.$e->getMessage(),
+                'message' => 'Koneksi ke platform gagal. Coba lagi dan periksa konfigurasi atau log aplikasi.',
                 'payload' => null,
                 'response' => null,
             ];
