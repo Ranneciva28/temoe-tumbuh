@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FormField;
 use App\Models\Lead;
 use App\Models\Setting;
+use App\Services\InterestFormContent;
 use App\Services\MetaConversionsApi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class InterestController extends Controller
 {
-    public function create(Request $request): View
+    public function create(Request $request, InterestFormContent $formContent): View
     {
         $attribution = [];
         foreach (['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'] as $key) {
@@ -23,27 +24,38 @@ class InterestController extends Controller
         $attribution['landing_page'] = $request->old('landing_page', $request->fullUrl());
         $attribution['referrer'] = $request->old('referrer', $request->headers->get('referer'));
 
+        $content = $formContent->values();
+
         return view('interest.create', [
             'fields' => FormField::query()->where('form_key', 'interest')->where('is_active', true)->orderBy('sort_order')->get(),
             'tracking' => Setting::groupValues('tracking'),
             'attribution' => $attribution,
+            'content' => $content,
+            'cityOptions' => $formContent->options('city_options', $content),
+            'scheduleOptions' => $formContent->options('preferred_schedule_options', $content),
+            'budgetOptions' => $formContent->options('budget_range_options', $content),
         ]);
     }
 
-    public function store(Request $request, MetaConversionsApi $meta): RedirectResponse
+    public function store(Request $request, MetaConversionsApi $meta, InterestFormContent $formContent): RedirectResponse
     {
+        $content = $formContent->values();
+        $cityOptions = $formContent->options('city_options', $content);
+        $scheduleOptions = $formContent->options('preferred_schedule_options', $content);
+        $budgetOptions = $formContent->options('budget_range_options', $content);
+
         $data = $request->validate([
             'parent_name' => ['required','string','max:120'],
             'whatsapp' => ['required','string','max:30'],
             'email' => ['nullable','email','max:160'],
             'child_name' => ['nullable','string','max:120'],
             'child_age' => ['nullable','integer','min:0','max:12'],
-            'city' => ['nullable','string','max:120'],
+            'city' => array_values(array_filter(['nullable','string','max:120', $cityOptions ? Rule::in($cityOptions) : null])),
             'district' => ['nullable','string','max:120'],
             'preferred_location' => ['nullable','string','max:160'],
-            'preferred_schedule' => ['nullable','string','max:160'],
+            'preferred_schedule' => array_values(array_filter(['nullable','string','max:160', $scheduleOptions ? Rule::in($scheduleOptions) : null])),
             'preferred_start_date' => ['nullable','date'],
-            'budget_range' => ['nullable','string','max:120'],
+            'budget_range' => array_values(array_filter(['nullable','string','max:120', $budgetOptions ? Rule::in($budgetOptions) : null])),
             'reservation_interest' => ['nullable','boolean'],
             'privacy_consent' => ['accepted'],
             'utm_source' => ['nullable','string','max:255'],
