@@ -6,11 +6,13 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FormFieldController;
 use App\Http\Controllers\Admin\FormSectionController;
 use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\Admin\MetaEventMappingController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PasswordController;
 use App\Http\Controllers\Admin\PageSectionController;
 use App\Http\Controllers\Admin\TrackingSettingController;
 use App\Http\Controllers\InterestController;
+use App\Http\Controllers\MetaEventRecordController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,7 @@ Route::view('/privasi', 'privacy')->name('privacy');
 Route::get('/minat', [InterestController::class, 'create'])->name('interest.create');
 Route::post('/minat', [InterestController::class, 'store'])->name('interest.store');
 Route::get('/terima-kasih', [InterestController::class, 'thankYou'])->name('interest.thank-you');
+Route::post('/tracking/meta/record', MetaEventRecordController::class)->middleware('throttle:120,1')->name('meta-events.record');
 
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'create'])->name('admin.login');
@@ -56,6 +59,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/tracking', [TrackingSettingController::class, 'edit'])->name('tracking.edit');
     Route::put('/tracking', [TrackingSettingController::class, 'update'])->name('tracking.update');
+    Route::post('/tracking/meta-mappings', [MetaEventMappingController::class, 'store'])->name('tracking.meta-mappings.store');
+    Route::put('/tracking/meta-mappings/{mapping}', [MetaEventMappingController::class, 'update'])->name('tracking.meta-mappings.update');
+    Route::delete('/tracking/meta-mappings/{mapping}', [MetaEventMappingController::class, 'destroy'])->name('tracking.meta-mappings.destroy');
     Route::post('/tracking/test/{platform}', [TrackingSettingController::class, 'test'])->name('tracking.test');
     Route::get('/branding', [BrandingSettingController::class, 'edit'])->name('branding.edit');
     Route::put('/branding', [BrandingSettingController::class, 'update'])->name('branding.update');
