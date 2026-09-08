@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BrandingSettingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FormFieldController;
+use App\Http\Controllers\Admin\FormSectionController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PasswordController;
@@ -42,6 +43,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/form-minat', [FormFieldController::class, 'index'])->name('form-fields.index');
     Route::put('/form-minat/content', [FormFieldController::class, 'updateContent'])->name('form-fields.content.update');
+    Route::post('/form-minat/sections', [FormSectionController::class, 'store'])->name('form-fields.sections.store');
+    Route::put('/form-minat/sections/{section}', [FormSectionController::class, 'update'])->name('form-fields.sections.update');
+    Route::delete('/form-minat/sections/{section}', [FormSectionController::class, 'destroy'])->name('form-fields.sections.destroy');
     Route::post('/form-minat', [FormFieldController::class, 'store'])->name('form-fields.store');
     Route::put('/form-minat/{field}', [FormFieldController::class, 'update'])->name('form-fields.update');
     Route::delete('/form-minat/{field}', [FormFieldController::class, 'destroy'])->name('form-fields.destroy');
