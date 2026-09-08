@@ -75,7 +75,7 @@ class FormSectionController extends Controller
             $section->delete();
         });
 
-        return back()->with('success', 'Section dan pertanyaan di dalamnya dihapus. Jawaban historis pada lead tetap tersimpan.');
+        return back()->with('success', 'Section dan seluruh field di dalamnya dihapus. Data lead historis tetap tersimpan.');
     }
 
     private function ensureInterestSection(FormSection $section): void
