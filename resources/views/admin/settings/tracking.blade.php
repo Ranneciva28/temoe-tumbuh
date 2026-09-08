@@ -2,7 +2,9 @@
 @section('title','Tracking')
 @section('topbar','Marketing Tracking')
 @section('content')
-@php($test = session('tracking_test_result'))
+@php
+    $test = session('tracking_test_result');
+@endphp
 <div class="heading">
     <div><h1>Tracking, Pixels & Test Events</h1><p>Kelola ID/API, kirim dummy event, dan lihat tepatnya data apa yang diteruskan ke setiap platform.</p></div>
 </div>
@@ -89,20 +91,23 @@
 </div>
 
 @if($test && !empty($test['browser_dispatch']) && $test['success'])
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($settings['google_ads_conversion_id']) }}"></script>
-    <script>
-        window.dataLayer=window.dataLayer||[];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js',new Date());
-        gtag('config',@json($settings['google_ads_conversion_id']));
-        gtag('event','conversion',@json([
+    @php
+        $googleTestPayload = [
             'send_to' => $test['payload']['send_to'],
             'currency' => 'IDR',
             'value' => 0,
             'transaction_id' => $test['event_id'],
             'event_category' => 'integration_test',
             'event_label' => 'temoe_dummy_conversion',
-        ]));
+        ];
+    @endphp
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($settings['google_ads_conversion_id']) }}"></script>
+    <script>
+        window.dataLayer=window.dataLayer||[];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js',new Date());
+        gtag('config',@json($settings['google_ads_conversion_id']));
+        gtag('event','conversion',@json($googleTestPayload));
     </script>
 @endif
 @endsection

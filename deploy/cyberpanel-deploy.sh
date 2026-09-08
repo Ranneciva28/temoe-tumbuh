@@ -58,6 +58,12 @@ if [ -f artisan ]; then
   "$PHP" artisan config:cache
   "$PHP" artisan route:cache
   "$PHP" artisan view:cache
+  while IFS= read -r -d '' view; do
+    if ! "$PHP" -l "$view"; then
+      tail -n 3 "$view"
+      exit 1
+    fi
+  done < <(find storage/framework/views -type f -name '*.php' -print0)
   "$PHP" artisan up
   maintenance_started=0
 fi

@@ -48,6 +48,12 @@ jobs:
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
+          while IFS= read -r -d '' view; do
+            if ! php -l "$view"; then
+              tail -n 5 "$view"
+              exit 1
+            fi
+          done < <(find storage/framework/views -type f -name '*.php' -print0)
 
       - name: Smoke test public routes
         run: |
