@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FormField;
+use App\Models\FormSection;
 use App\Models\Lead;
 use App\Models\Setting;
 use App\Services\InterestFormContent;
@@ -25,9 +26,23 @@ class InterestController extends Controller
         $attribution['referrer'] = $request->old('referrer', $request->headers->get('referer'));
 
         $content = $formContent->values();
+        $sections = FormSection::query()
+            ->where('form_key', 'interest')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+        $activeSectionKeys = $sections->pluck('section_key');
 
         return view('interest.create', [
-            'fields' => FormField::query()->where('form_key', 'interest')->where('is_active', true)->orderBy('sort_order')->get(),
+            'sections' => $sections,
+            'fields' => FormField::query()
+                ->where('form_key', 'interest')
+                ->where('is_active', true)
+                ->whereIn('section_key', $activeSectionKeys)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get(),
             'tracking' => Setting::groupValues('tracking'),
             'attribution' => $attribution,
             'content' => $content,
@@ -69,7 +84,15 @@ class InterestController extends Controller
             'referrer' => ['nullable','string','max:4000'],
         ]);
 
-        $fields = FormField::query()->where('form_key', 'interest')->where('is_active', true)->get();
+        $activeSectionKeys = FormSection::query()
+            ->where('form_key', 'interest')
+            ->where('is_active', true)
+            ->pluck('section_key');
+        $fields = FormField::query()
+            ->where('form_key', 'interest')
+            ->where('is_active', true)
+            ->whereIn('section_key', $activeSectionKeys)
+            ->get();
         $rules = [];
         $attributes = [];
 
