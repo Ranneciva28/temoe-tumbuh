@@ -89,20 +89,23 @@
 </div>
 
 @if($test && !empty($test['browser_dispatch']) && $test['success'])
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($settings['google_ads_conversion_id']) }}"></script>
-    <script>
-        window.dataLayer=window.dataLayer||[];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js',new Date());
-        gtag('config',@json($settings['google_ads_conversion_id']));
-        gtag('event','conversion',@json([
+    @php
+        $googleTestPayload = [
             'send_to' => $test['payload']['send_to'],
             'currency' => 'IDR',
             'value' => 0,
             'transaction_id' => $test['event_id'],
             'event_category' => 'integration_test',
             'event_label' => 'temoe_dummy_conversion',
-        ]));
+        ];
+    @endphp
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ urlencode($settings['google_ads_conversion_id']) }}"></script>
+    <script>
+        window.dataLayer=window.dataLayer||[];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js',new Date());
+        gtag('config',@json($settings['google_ads_conversion_id']));
+        gtag('event','conversion',@json($googleTestPayload));
     </script>
 @endif
 @endsection
