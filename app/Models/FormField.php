@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class FormField extends Model
 {
     protected $fillable = [
-        'form_key','field_key','label','type','placeholder','help_text','options',
+        'form_key','section_key','field_key','label','type','placeholder','help_text','options',
         'is_required','is_active','sort_order','validation_rules',
     ];
 
