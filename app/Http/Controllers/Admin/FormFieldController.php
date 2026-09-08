@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FormField;
+use App\Models\FormSection;
 use App\Models\Setting;
 use App\Services\InterestFormContent;
 use Illuminate\Http\RedirectResponse;
@@ -23,10 +24,11 @@ class FormFieldController extends Controller
     public function index(InterestFormContent $formContent): View
     {
         $fields = FormField::query()->where('form_key', 'interest')->orderBy('sort_order')->get();
+        $sections = FormSection::query()->where('form_key', 'interest')->orderBy('sort_order')->orderBy('id')->get();
         $content = $formContent->values();
         $contentGroups = $formContent->adminGroups();
 
-        return view('admin.form-fields.index', compact('fields', 'content', 'contentGroups'));
+        return view('admin.form-fields.index', compact('fields', 'sections', 'content', 'contentGroups'));
     }
 
     public function updateContent(Request $request): RedirectResponse
@@ -84,6 +86,12 @@ class FormFieldController extends Controller
         }
 
         return $request->validate([
+            'section_key' => [
+                'required',
+                'string',
+                Rule::exists('form_sections', 'section_key')
+                    ->where(fn ($query) => $query->where('form_key', 'interest')),
+            ],
             'field_key' => $fieldKeyRules,
             'label' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:text,email,tel,number,date,select,radio,checkbox,textarea,hidden'],
