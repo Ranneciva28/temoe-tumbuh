@@ -58,6 +58,7 @@ if [ -f artisan ]; then
   "$PHP" artisan config:cache
   "$PHP" artisan route:cache
   "$PHP" artisan view:cache
+  find storage/framework/views -type f -name '*.php' -print0 | xargs -0 -n1 "$PHP" -l
   "$PHP" artisan up
   maintenance_started=0
 fi
