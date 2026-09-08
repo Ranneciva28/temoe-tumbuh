@@ -70,37 +70,37 @@
     <div class="actions" style="justify-content:flex-end"><button class="btn btn-primary">Simpan Seluruh Konten Form Minat</button></div>
 </form>
 
-<div class="heading" style="margin-top:32px"><div><h2 style="margin:0">Pertanyaan Tambahan</h2><p>Setiap pertanyaan bisa ditempatkan dan dipindahkan ke section buatan Moms.</p></div></div>
+<div class="heading" style="margin-top:32px"><div><h2 style="margin:0">Semua Field Form</h2><p>Field inti dan field tambahan dikelola di tempat yang sama: bisa diedit, dipindahkan, dinonaktifkan, ditambah, atau dihapus.</p></div></div>
 <div class="grid grid-2" style="align-items:start">
     <div class="stack">
         @forelse($fields as $field)
             <div>
                 <form class="card card-pad" method="post" action="{{ route('admin.form-fields.update', $field) }}">
                     @csrf @method('PUT')
-                    <div class="actions" style="justify-content:space-between"><div><strong>{{ $field->label }}</strong><div class="help">{{ $field->field_key }} · {{ $field->type }}</div></div><div class="actions"><label class="help"><input type="checkbox" name="is_required" value="1" @checked($field->is_required)> Wajib</label><label class="help"><input type="checkbox" name="is_active" value="1" @checked($field->is_active)> Aktif</label></div></div>
+                    <div class="actions" style="justify-content:space-between"><div><strong>{{ $field->label }}</strong><div class="help">{{ $field->field_key }} · {{ $field->type }} · {{ $field->isCore() ? 'field inti' : 'field tambahan' }}</div></div><div class="actions">@if($field->isCore())<span class="badge">Field inti</span>@endif<label class="help"><input type="checkbox" name="is_required" value="1" @checked($field->is_required)> Wajib</label><label class="help"><input type="checkbox" name="is_active" value="1" @checked($field->is_active)> Aktif</label></div></div>
                     <div class="grid grid-2" style="margin-top:14px">
                         <div class="field"><label>Section</label><select class="select" name="section_key" required>@foreach($sections as $section)<option value="{{ $section->section_key }}" @selected($field->section_key === $section->section_key)>{{ $section->title }}</option>@endforeach</select></div>
                         <div class="field"><label>Label</label><input class="input" name="label" value="{{ $field->label }}" required></div>
-                        <div class="field"><label>Tipe</label><select class="select" name="type">@foreach(['text','email','tel','number','date','select','radio','checkbox','textarea','hidden'] as $type)<option @selected($field->type===$type)>{{ $type }}</option>@endforeach</select></div>
+                        <div class="field"><label>Tipe</label><select class="select" name="type">@foreach($field->allowedTypes() as $type)<option @selected($field->type===$type)>{{ $type }}</option>@endforeach</select></div>
                         <div class="field"><label>Placeholder</label><input class="input" name="placeholder" value="{{ $field->placeholder }}"></div>
                         <div class="field"><label>Urutan dalam section</label><input class="input" type="number" name="sort_order" value="{{ $field->sort_order }}"></div>
                     </div>
                     <div class="field" style="margin-top:12px"><label>Help text</label><input class="input" name="help_text" value="{{ $field->help_text }}"></div>
                     <div class="field" style="margin-top:12px"><label>Options (satu pilihan per baris)</label><textarea class="textarea" name="options_text">{{ $field->options ? implode("\n", $field->options) : '' }}</textarea></div>
-                    <button style="margin-top:14px" class="btn btn-primary">Simpan Pertanyaan</button>
+                    <button style="margin-top:14px" class="btn btn-primary">Simpan Field</button>
                 </form>
-                <form method="post" action="{{ route('admin.form-fields.destroy', $field) }}" style="margin-top:9px" onsubmit="return confirm('Hapus pertanyaan ini? Jawaban historis di leads tidak ikut terhapus.')">@csrf @method('DELETE')<button class="btn btn-danger">Hapus {{ $field->label }}</button></form>
+                <form method="post" action="{{ route('admin.form-fields.destroy', $field) }}" style="margin-top:9px" onsubmit="return confirm('Hapus field ini dari Form Minat? Data lead yang sudah tersimpan tidak ikut terhapus.')">@csrf @method('DELETE')<button class="btn btn-danger">Hapus {{ $field->label }}</button></form>
             </div>
         @empty
-            <div class="card empty">Belum ada pertanyaan tambahan. Tambahkan pertanyaan lalu pilih section tempat pertanyaan ditampilkan.</div>
+            <div class="card empty">Belum ada field. Tambahkan field lalu pilih section tempat field ditampilkan.</div>
         @endforelse
     </div>
     <form class="card card-pad" method="post" action="{{ route('admin.form-fields.store') }}">
         @csrf
-        <h3 class="section-title">Tambah Pertanyaan</h3>
+        <h3 class="section-title">Tambah Field</h3>
         <div class="stack">
             <div class="field"><label>Section</label><select class="select" name="section_key" required>@foreach($sections as $section)<option value="{{ $section->section_key }}" @selected(old('section_key') === $section->section_key)>{{ $section->title }}</option>@endforeach</select><div class="help">Buat section baru terlebih dahulu bila pilihan yang dibutuhkan belum tersedia.</div></div>
-            <div class="field"><label>Field Key</label><input class="input" name="field_key" value="{{ old('field_key') }}" required pattern="[a-z0-9_]+" placeholder="work_arrangement"><div class="help">Unik, huruf kecil/angka/underscore.</div></div>
+            <div class="field"><label>Field Key</label><input class="input" name="field_key" value="{{ old('field_key') }}" required pattern="[a-z0-9_]+" placeholder="work_arrangement"><div class="help">Unik, huruf kecil/angka/underscore. Untuk mengembalikan field inti yang terhapus, gunakan key aslinya.</div></div>
             <div class="field"><label>Label pertanyaan</label><input class="input" name="label" value="{{ old('label') }}" required placeholder="Bagaimana pola kerja orang tua?"></div>
             <div class="field"><label>Tipe jawaban</label><select class="select" name="type">@foreach(['text','email','tel','number','date','select','radio','checkbox','textarea'] as $type)<option @selected(old('type') === $type)>{{ $type }}</option>@endforeach</select></div>
             <div class="field"><label>Placeholder</label><input class="input" name="placeholder" value="{{ old('placeholder') }}"></div>
@@ -108,7 +108,7 @@
             <div class="field"><label>Options</label><textarea class="textarea" name="options_text" placeholder="WFO&#10;Hybrid&#10;WFH">{{ old('options_text') }}</textarea></div>
             <div class="field"><label>Urutan dalam section</label><input class="input" type="number" name="sort_order" value="{{ old('sort_order', 100) }}"></div>
             <div class="actions"><label class="help"><input type="checkbox" name="is_required" value="1" @checked(old('is_required'))> Wajib</label><label class="help"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', true))> Aktif</label></div>
-            <button class="btn btn-primary">Tambah Pertanyaan</button>
+            <button class="btn btn-primary">Tambah Field</button>
         </div>
     </form>
 </div>
