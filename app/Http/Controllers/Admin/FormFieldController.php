@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FormField;
+use App\Models\Setting;
+use App\Services\InterestFormContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,10 +20,28 @@ class FormFieldController extends Controller
         'utm_campaign','utm_content','utm_term','fbclid','gclid','referrer','landing_page',
     ];
 
-    public function index(): View
+    public function index(InterestFormContent $formContent): View
     {
         $fields = FormField::query()->where('form_key', 'interest')->orderBy('sort_order')->get();
-        return view('admin.form-fields.index', compact('fields'));
+        $content = $formContent->values();
+        $contentGroups = $formContent->adminGroups();
+
+        return view('admin.form-fields.index', compact('fields', 'content', 'contentGroups'));
+    }
+
+    public function updateContent(Request $request): RedirectResponse
+    {
+        $rules = [];
+        foreach (array_keys(InterestFormContent::DEFAULTS) as $key) {
+            $rules[$key] = ['nullable', 'string', 'max:5000'];
+        }
+
+        $data = $request->validate($rules);
+        foreach (array_keys(InterestFormContent::DEFAULTS) as $key) {
+            Setting::put('interest_form', $key, $data[$key] ?? null);
+        }
+
+        return back()->with('success', 'Seluruh konten Form Minat diperbarui.');
     }
 
     public function store(Request $request): RedirectResponse

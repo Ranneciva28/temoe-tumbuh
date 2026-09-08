@@ -41,6 +41,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::delete('/homepage/{section}', [PageSectionController::class, 'destroy'])->name('cms.destroy');
 
     Route::get('/form-minat', [FormFieldController::class, 'index'])->name('form-fields.index');
+    Route::put('/form-minat/content', [FormFieldController::class, 'updateContent'])->name('form-fields.content.update');
     Route::post('/form-minat', [FormFieldController::class, 'store'])->name('form-fields.store');
     Route::put('/form-minat/{field}', [FormFieldController::class, 'update'])->name('form-fields.update');
     Route::delete('/form-minat/{field}', [FormFieldController::class, 'destroy'])->name('form-fields.destroy');
