@@ -55,6 +55,70 @@
     <div class="actions" style="margin-top:20px"><button class="btn btn-primary">Simpan Semua Konfigurasi</button></div>
 </form>
 
+<div class="card card-pad" style="margin-top:18px;background:#edf3e9">
+    <div class="actions" style="justify-content:space-between;align-items:flex-start">
+        <div><h2 style="margin:0 0 7px;font-size:21px">Meta Event Mapper</h2><p class="help" style="margin:0;max-width:760px">Pilih event Meta, kapan event dipicu, dan tombol atau halaman yang menjadi target. Hanya mapping berstatus aktif yang dikirim ke Meta Pixel.</p></div>
+        <span class="badge {{ filled($settings['meta_pixel_id'] ?? null) ? 'badge-qualified' : '' }}">{{ filled($settings['meta_pixel_id'] ?? null) ? 'Pixel siap' : 'Pixel ID belum diisi' }}</span>
+    </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px;align-items:start">
+    <form class="card card-pad meta-mapping-form" method="post" action="{{ route('admin.tracking.meta-mappings.store') }}">
+        @csrf
+        <h3 class="section-title">Tempel Event ke Target</h3>
+        <div class="stack">
+            <div class="field"><label>Event Meta</label><select class="select" name="event_name" required>@foreach($metaEvents as $name=>$description)<option value="{{ $name }}" @selected(old('event_name')===$name)>{{ $name }} — {{ $description }}</option>@endforeach</select></div>
+            <div class="field"><label>Jenis pemicu</label><select class="select meta-trigger" name="trigger_type" required>@foreach($metaTriggers as $key=>$label)<option value="{{ $key }}" @selected(old('trigger_type')===$key)>{{ $label }}</option>@endforeach</select></div>
+            <div class="field"><label>Halaman, tombol, atau aksi</label><select class="select meta-target" name="target_key" required>@foreach($metaTargets as $target)<option value="{{ $target['key'] }}" data-trigger="{{ $target['trigger'] }}" @selected(old('target_key')===$target['key'])>{{ $target['label'] }}</option>@endforeach</select></div>
+            <label class="help"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', true))> Langsung aktif</label>
+            <button class="btn btn-primary">Tambahkan Mapping</button>
+        </div>
+    </form>
+
+    <div class="card card-pad">
+        <h3 class="section-title">Standard Event Meta yang Tersedia</h3>
+        <p class="help" style="margin-top:-7px">Gunakan event yang paling dekat dengan aksi pengunjung agar optimasi campaign tetap terbaca jelas.</p>
+        <p class="help"><strong>Saran untuk Temoe:</strong> PageView untuk halaman, ViewContent untuk konten/FAQ, Contact untuk tombol daftar minat, SubmitApplication saat form dikirim, dan Lead setelah data berhasil tersimpan.</p>
+        <div class="grid grid-2" style="margin-top:16px">
+            @foreach($metaEvents as $name=>$description)
+                <div style="border:1px solid var(--line);border-radius:11px;padding:11px"><strong style="font-size:13px">{{ $name }}</strong><div class="help" style="margin-top:4px">{{ $description }}</div></div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+<div class="heading" style="margin-top:26px;margin-bottom:15px"><div><h2 style="margin:0;font-size:20px">Mapping Aktif & Tersimpan</h2><p>Mapping dapat diubah, dimatikan sementara, atau dihapus tanpa menyentuh kode website.</p></div></div>
+<div class="stack">
+    @forelse($metaMappings as $mapping)
+        <div class="card card-pad">
+            <form class="meta-mapping-form" method="post" action="{{ route('admin.tracking.meta-mappings.update', $mapping) }}">
+                @csrf @method('PUT')
+                <div class="actions" style="justify-content:space-between;margin-bottom:14px"><div><strong>{{ $mapping->event_name }}</strong><div class="help">{{ $metaTargetLabels[$mapping->target_key] ?? $mapping->target_key }}</div></div><label class="help"><input type="checkbox" name="is_active" value="1" @checked($mapping->is_active)> Aktif</label></div>
+                <div class="grid grid-3">
+                    <div class="field"><label>Event Meta</label><select class="select" name="event_name" required>@foreach($metaEvents as $name=>$description)<option value="{{ $name }}" @selected($mapping->event_name===$name)>{{ $name }}</option>@endforeach</select></div>
+                    <div class="field"><label>Pemicu</label><select class="select meta-trigger" name="trigger_type" required>@foreach($metaTriggers as $key=>$label)<option value="{{ $key }}" @selected($mapping->trigger_type===$key)>{{ $label }}</option>@endforeach</select></div>
+                    <div class="field"><label>Target</label><select class="select meta-target" name="target_key" required>@foreach($metaTargets as $target)<option value="{{ $target['key'] }}" data-trigger="{{ $target['trigger'] }}" @selected($mapping->target_key===$target['key'])>{{ $target['label'] }}</option>@endforeach</select></div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:14px">Simpan Mapping</button>
+            </form>
+            <form method="post" action="{{ route('admin.tracking.meta-mappings.destroy', $mapping) }}" style="margin-top:9px" onsubmit="return confirm('Hapus mapping ini? Event tidak akan dikirim lagi dari target tersebut.')">@csrf @method('DELETE')<button class="btn btn-danger">Hapus Mapping</button></form>
+        </div>
+    @empty
+        <div class="card empty">Belum ada mapping. Meta Pixel tidak akan mengirim event website sampai mapping dibuat.</div>
+    @endforelse
+</div>
+
+<div class="card" style="margin-top:26px">
+    <div class="card-pad"><h3 class="section-title">100 Event Meta Terakhir</h3><p class="help">Browser berarti Pixel sudah dipanggil dari perangkat pengunjung. Server berarti Conversions API sudah mendapat respons dari Meta.</p></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Waktu</th><th>Event</th><th>Target</th><th>Channel</th><th>Status</th><th>Event ID</th></tr></thead><tbody>
+        @forelse($metaLogs as $log)
+            <tr><td>{{ $log->created_at->format('d M Y H:i:s') }}</td><td><strong>{{ $log->event_name }}</strong><div class="help">{{ $metaTriggers[$log->trigger_type] ?? $log->trigger_type }}</div></td><td>{{ $metaTargetLabels[$log->target_key] ?? $log->target_key }}</td><td><span class="badge">{{ $log->channel === 'server' ? 'CAPI / Server' : 'Pixel / Browser' }}</span></td><td><span class="badge {{ in_array($log->status, ['accepted','dispatched'], true) ? 'badge-qualified' : 'badge-lost' }}">{{ $log->status }}</span></td><td><code style="font-size:11px;word-break:break-all">{{ $log->event_id }}</code></td></tr>
+        @empty
+            <tr><td colspan="6" class="empty">Belum ada event yang didispatch dari mapping aktif.</td></tr>
+        @endforelse
+    </tbody></table></div>
+</div>
+
 <div class="grid grid-3" style="margin-top:18px;align-items:stretch">
     @foreach([
         ['key'=>'meta','name'=>'Meta','ready'=>filled($settings['meta_pixel_id'] ?? null) && filled($settings['meta_capi_token'] ?? null) && filled($settings['meta_test_event_code'] ?? null),'event'=>'Lead','note'=>'Dikirim via Conversions API menggunakan Test Event Code.'],
@@ -79,17 +143,6 @@
     </tbody></table></div>
 </div>
 
-<div class="card" style="margin-top:18px">
-    <div class="card-pad"><h3 class="section-title">Event website aktif</h3><p class="help">Meta dan TikTok menerima standard event; GA4 menerima nama event yang sesuai action.</p></div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Action</th><th>Meta / TikTok</th><th>GA4</th><th>Event label</th></tr></thead><tbody>
-        <tr><td>Page load</td><td>PageView</td><td>page_view</td><td>Halaman yang dibuka</td></tr>
-        <tr><td>Klik menu sticky / buka FAQ</td><td>ViewContent</td><td>navigation_click / faq_open</td><td>program, experience, pricing, parents, FAQ topic</td></tr>
-        <tr><td>Klik CTA daftar minat</td><td>Contact</td><td>begin_signup</td><td>Posisi CTA yang diklik</td></tr>
-        <tr><td>Kirim formulir</td><td>SubmitApplication</td><td>form_submit</td><td>interest_form_submit</td></tr>
-        <tr><td>Lead berhasil tersimpan</td><td>Meta: Lead via browser + CAPI</td><td>generate_lead + Google Ads conversion</td><td>interest_form</td></tr>
-    </tbody></table></div>
-</div>
-
 @if($test && !empty($test['browser_dispatch']) && $test['success'])
     @php
         $googleTestPayload = [
@@ -110,4 +163,27 @@
         gtag('event','conversion',@json($googleTestPayload));
     </script>
 @endif
+@push('scripts')
+<script>
+document.querySelectorAll('.meta-mapping-form').forEach(function(form){
+    var trigger=form.querySelector('.meta-trigger');
+    var target=form.querySelector('.meta-target');
+    if(!trigger||!target)return;
+    function filterTargets(){
+        var firstVisible=null;
+        var selectedVisible=false;
+        Array.from(target.options).forEach(function(option){
+            var visible=option.dataset.trigger===trigger.value;
+            option.hidden=!visible;
+            option.disabled=!visible;
+            if(visible&&!firstVisible)firstVisible=option;
+            if(visible&&option.selected)selectedVisible=true;
+        });
+        if(!selectedVisible&&firstVisible)firstVisible.selected=true;
+    }
+    trigger.addEventListener('change',filterTargets);
+    filterTargets();
+});
+</script>
+@endpush
 @endsection
