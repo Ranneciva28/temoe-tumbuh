@@ -116,9 +116,12 @@ class InterestController extends Controller
         $data['user_agent'] = $request->userAgent();
 
         $lead = Lead::create($data);
-        $metaEventId = $meta->sendLead($lead, $request);
+        $metaEventIds = $meta->sendLead($lead, $request);
 
-        return redirect()->route('interest.thank-you')->with('meta_event_id', $metaEventId);
+        return redirect()->route('interest.thank-you')->with([
+            'lead_submitted' => true,
+            'meta_event_ids' => $metaEventIds,
+        ]);
     }
 
     public function thankYou(): View
