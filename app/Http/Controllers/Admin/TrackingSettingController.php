@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\MetaEventLog;
+use App\Models\MetaEventMapping;
 use App\Models\Setting;
 use App\Services\AdEventTester;
+use App\Services\MetaEventCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,10 +16,20 @@ use Throwable;
 
 class TrackingSettingController extends Controller
 {
-    public function edit(): View
+    public function edit(MetaEventCatalog $catalog): View
     {
         $settings = Setting::groupValues('tracking');
-        return view('admin.settings.tracking', compact('settings'));
+        $metaMappings = MetaEventMapping::query()->latest()->get();
+        $metaLogs = MetaEventLog::query()->latest()->limit(100)->get();
+        $metaEvents = MetaEventCatalog::EVENTS;
+        $metaTriggers = MetaEventCatalog::TRIGGERS;
+        $metaTargets = $catalog->targets();
+        $metaTargetLabels = collect($metaTargets)->pluck('label', 'key');
+
+        return view('admin.settings.tracking', compact(
+            'settings', 'metaMappings', 'metaLogs', 'metaEvents',
+            'metaTriggers', 'metaTargets', 'metaTargetLabels'
+        ));
     }
 
     public function update(Request $request): RedirectResponse
