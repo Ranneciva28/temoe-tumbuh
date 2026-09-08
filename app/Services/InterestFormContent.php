@@ -87,8 +87,7 @@ class InterestFormContent
                 ['key' => 'intro_price_note', 'label' => 'Highlight harga'],
                 ['key' => 'validation_error_title', 'label' => 'Pesan saat data belum valid'],
             ]],
-            ['title' => 'Section 1 · Orang tua', 'description' => 'Judul section, label, dan placeholder data Moms.', 'fields' => [
-                ['key' => 'parent_section_title', 'label' => 'Judul section'],
+            ['title' => 'Field inti · Orang tua', 'description' => 'Label dan placeholder data Moms. Judul section dikelola melalui Pengaturan Section.', 'fields' => [
                 ['key' => 'parent_name_label', 'label' => 'Label nama orang tua'],
                 ['key' => 'parent_name_placeholder', 'label' => 'Placeholder nama orang tua'],
                 ['key' => 'whatsapp_label', 'label' => 'Label WhatsApp'],
@@ -96,8 +95,7 @@ class InterestFormContent
                 ['key' => 'email_label', 'label' => 'Label email'],
                 ['key' => 'email_placeholder', 'label' => 'Placeholder email'],
             ]],
-            ['title' => 'Section 2 · Anak & lokasi', 'description' => 'Semua label dan pilihan lokasi pada section kedua.', 'fields' => [
-                ['key' => 'child_section_title', 'label' => 'Judul section'],
+            ['title' => 'Field inti · Anak & lokasi', 'description' => 'Semua label dan pilihan lokasi. Judul section dikelola melalui Pengaturan Section.', 'fields' => [
                 ['key' => 'child_name_label', 'label' => 'Label nama anak'],
                 ['key' => 'child_name_placeholder', 'label' => 'Placeholder nama anak'],
                 ['key' => 'child_age_label', 'label' => 'Label usia anak'],
@@ -110,8 +108,7 @@ class InterestFormContent
                 ['key' => 'preferred_location_label', 'label' => 'Label area daycare'],
                 ['key' => 'preferred_location_placeholder', 'label' => 'Placeholder area daycare'],
             ]],
-            ['title' => 'Section 3 · Kebutuhan daycare', 'description' => 'Copy jadwal, tanggal mulai, dan budget.', 'fields' => [
-                ['key' => 'daycare_section_title', 'label' => 'Judul section'],
+            ['title' => 'Field inti · Kebutuhan daycare', 'description' => 'Copy jadwal, tanggal mulai, dan budget. Judul section dikelola melalui Pengaturan Section.', 'fields' => [
                 ['key' => 'preferred_schedule_label', 'label' => 'Label jadwal'],
                 ['key' => 'preferred_schedule_placeholder', 'label' => 'Pilihan kosong jadwal'],
                 ['key' => 'preferred_schedule_options', 'label' => 'Pilihan jadwal', 'type' => 'options'],
@@ -120,8 +117,7 @@ class InterestFormContent
                 ['key' => 'budget_range_placeholder', 'label' => 'Pilihan kosong budget'],
                 ['key' => 'budget_range_options', 'label' => 'Pilihan budget', 'type' => 'options'],
             ]],
-            ['title' => 'Section tambahan, persetujuan & tombol', 'description' => 'Judul pertanyaan dinamis, priority slot, consent, tombol, dan catatan akhir.', 'fields' => [
-                ['key' => 'additional_section_title', 'label' => 'Judul section pertanyaan tambahan'],
+            ['title' => 'Persetujuan & tombol', 'description' => 'Copy priority slot, consent, tombol, dan catatan akhir. Judul section dikelola melalui Pengaturan Section.', 'fields' => [
                 ['key' => 'reservation_label', 'label' => 'Label priority slot'],
                 ['key' => 'reservation_help', 'label' => 'Keterangan priority slot', 'type' => 'textarea'],
                 ['key' => 'privacy_consent_prefix', 'label' => 'Teks consent sebelum link'],
