@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
         foreach ($defaults as $field) {
             FormField::query()->firstOrCreate(
                 ['form_key' => 'interest', 'field_key' => $field['field_key']],
-                array_merge($field, ['form_key'=>'interest','is_required'=>false,'is_active'=>true])
+                array_merge($field, ['form_key'=>'interest','section_key'=>'additional','is_required'=>false,'is_active'=>true])
             );
         }
     }
