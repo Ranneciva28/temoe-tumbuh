@@ -2,7 +2,9 @@
 @section('title','Tracking')
 @section('topbar','Marketing Tracking')
 @section('content')
-@php($test = session('tracking_test_result'))
+@php
+    $test = session('tracking_test_result');
+@endphp
 <div class="heading">
     <div><h1>Tracking, Pixels & Test Events</h1><p>Kelola ID/API, kirim dummy event, dan lihat tepatnya data apa yang diteruskan ke setiap platform.</p></div>
 </div>
